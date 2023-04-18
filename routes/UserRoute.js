@@ -1,9 +1,8 @@
 import express from 'express'
-import { usersignup, userlogin  } from "../controllers/UserController.js";
+import { userLogin,userLogout,userSignup } from "../controllers/usercontroller.js";
 const router = express.Router()
-router.post('/api/usersignup',usersignup)
-router.post('/api/userlogin',userlogin)
-router.get('/',(req,res)=>{
-    res.send('welcome to node js')
-})
+router.post('/api/usersignup',userSignup)
+router.post('/api/userlogin',userLogin )
+router.post('/api/userlogout',userLogout )
+
 export default router

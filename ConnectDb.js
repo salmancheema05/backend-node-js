@@ -1,14 +1,16 @@
-import mongoose from 'mongoose';
-const ConnectDb = async (Dburl) =>{
-    mongoose.set("strictQuery", false);
-    try{
-        await mongoose.connect(Dburl).then(()=>{
-            console.log('Online DataBase has been connted')
-        })
-      
-    }
-    catch (error){
-        console.log(error)
-    }
+import pkg from 'pg'
+const {Pool} = pkg
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'mernproject',
+    password: 'techtownpk1234',
+    port: 5432, // default PostgreSQL port
+});
+const connectdb = () =>{
+    pool.connect().then(()=>{
+        console.log("database is connect")
+    }).catch((error) => console.log("database is not  connect "+error))
 }
-export default ConnectDb
+
+export { connectdb, pool}

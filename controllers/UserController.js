@@ -1,44 +1,77 @@
-import { useregistered, Usercollection } from "../models/User.js";
-import { verifypassword} from "./services/loginservice.js";
-const usersignup = async (req,res)=>{
-    const userdata = req.body
+import { professorCheckEmailOrUsername,studentCheckEmailOrUsername} from "./services/loginservice.js";
+import { professorAlreadyEmailOrUsername,studentAlreadyEmailOrUsername } from "./services/signupservice.js";
+import {professorTokenRemove,professorLoginStatusUpdate } from '../models/professormodel.js'
+import {studentTokenRemove,studentLoginStatusUpdate} from "../models/studentmodel.js"
+const userLogin = async (req ,res) =>{
     try{
-      await  useregistered(userdata) 
-      res.send('your have registerd on myapp')
+        const data = req.body
+        if(data.status =='' ){
+            res.status(400).send({"error":"require user status"})
+        }
+        else if(data.status ==='professor' ){
+            if(data.email==''|| data.username==''){
+                res.status(400).send({"error":"required email or username"})
+            }
+            else{
+                const result = await professorCheckEmailOrUsername(data)
+                res.status(result.httpstatus).send(result)
+            }   
+        }
+        else if(data.status === "student" ){
+            if(data.email=='' || data.username==''){
+                res.status(400).send({"error":"required email or username"})
+            }
+            else{ 
+                const result = await studentCheckEmailOrUsername(data)
+                res.status(result.httpstatus).send(result)
+                
+            }
+        }
+        else{
+            res.status(400).send({"error":"User Status should be professor or student "})
+        }
+       
     }
     catch(error){
         console.log(error)
     }
-    
 }
-const userlogin = async (req,res) =>{
-  if(req.body.email){
+const userLogout = async (req,res) =>{
+    const data = req.body
+    const dataInArray =[data.token,data.id]
+    const loginStatus =[false,data.id]
+    if(data.status==="professor"){
+        await professorTokenRemove(dataInArray)
+        professorLoginStatusUpdate(loginStatus)
+        res.status(200).send({"message":"user is  Logout"})
+        
+    }
+    else if(data.status==='student'){
+        const result= await studentTokenRemove(dataInArray)
+        await studentLoginStatusUpdate(loginStatus)
+         res.status(200).send({"message":"user is  Logout"})
+    }
+    else{
+        res.status(400).send({"error":"User Status should be professor or student "})
+    }
+}
+const userSignup = async (req,res) =>{
     try{
-      let receivedinfo = await Usercollection.findOne({email:req.body.email})
-      if(receivedinfo == null){
-        res.json({"error":"your email or username is incollect"})
-      }
-      else{
-        res.send(await verifypassword(receivedinfo,req.body.password))
-      }
+        const data = req.body
+        if(data.status == 'professor'){
+            const result = await professorAlreadyEmailOrUsername(data)
+            res.status(result.httpstatus).send(result)
+        }
+        else if(data.status =="student"){
+            const result = await studentAlreadyEmailOrUsername(data)
+            res.status(result.httpstatus).send(result)
+        }
+        else{
+            res.status(400).send({"error":"User Status should be professor or student "})
+        }
     }
     catch(error){
-      console.log(error)
+        console.log(error)
     }
-  }
-  else{
-    try{
-      let receivedinfo = await Usercollection.findOne({username:req.body.username})
-      if(receivedinfo == null){
-        res.json({"error":"your email or username is incollect"})
-      }
-      else{
-        res.send(await verifypassword(receivedinfo,req.body.password))
-      }
-    }
-    catch(error){
-      console.log(error)
-    }
-  }
 }
-export { usersignup, userlogin }
+export { userLogin, userLogout , userSignup } 
