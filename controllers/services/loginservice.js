@@ -2,6 +2,8 @@ import  jwt  from "jsonwebtoken"
 import bcrypt from 'bcrypt'
 import { professorTokenSave,professorLoginStatusUpdate,professorUserNameLoginQuery,professorEmailLoginQuery } from "../../models/professormodel.js"
 import { studentTokenSave,studentLoginStatusUpdate,studentUserNameLoginQuery,studentEmailLoginQuery } from "../../models/studentmodel.js"
+import * as dotenv from 'dotenv'
+dotenv.config()
 const professorCheckEmailOrUsername = async(data) => {
     try{
         if(data.hasOwnProperty('username')){
@@ -111,7 +113,7 @@ const createToken = async (data,loginstatus) =>{
             loginstatus:loginstatus,
             status:data.status
         }
-        const createToken = jwt.sign({userData},"34653tryfeydfefgtt5347")
+        const createToken = jwt.sign({userData},process.env.JWT_KEY)
         const tokenInfo = [createToken,userData.id]
         if(userData.status==="professor"){
             const result = await professorTokenSave(tokenInfo)
